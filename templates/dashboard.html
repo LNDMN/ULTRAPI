@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Генератор FastAPI приложения</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <style>
+        body {
+            background-color: #263238; /* Цвет фона */
+            color: #fff; /* Цвет текста */
+            font-family: 'Roboto', sans-serif; /* Современный шрифт */
+        }
+        .container {
+            padding-top: 50px;
+        }
+        label {
+            color: #fff; /* Цвет меток */
+        }
+        textarea {
+            font-family: monospace;
+            color: #000; /* Цвет текста внутри textarea */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="white-text">Генератор FastAPI приложения</h2>
+        <form action="/generate/" method="post">
+            <div class="input-field">
+                <select class="white-text" id="dbType" name="db_type" required>
+                    <option value="sqlite" selected>SQLite</option>
+                </select>
+                <label for="dbType" class="white-text">Тип базы данных:</label>
+            </div>
+            <div class="input-field">
+                <input type="text" class="white-text" id="apiUser" name="api_user" required>
+                <label for="apiUser" class="white-text">Логин пользователя API:</label>
+            </div>
+            <div class="input-field">
+                <input type="password" class="white-text" id="apiPassword" name="api_password" required>
+                <label for="apiPassword" class="white-text">Пароль пользователя API:</label>
+            </div>
+            <div class="input-field">
+                <textarea class="materialize-textarea white-text" id="ponyCode" name="pony_models_code" rows="15" required></textarea>
+                <label for="ponyCode" class="white-text">Код моделей PonyORM:</label>
+            </div>
+            <button type="submit" class="btn waves-effect waves-light blue-grey darken-4">Сгенерировать</button>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var elems = document.querySelectorAll('select');
+            var instances = M.FormSelect.init(elems);
+        });
+    </script>
+</body>
+</html>

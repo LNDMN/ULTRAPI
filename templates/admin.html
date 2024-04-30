@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .sidebar { width: 200px; float: left; background: #f0f0f0; height: 100vh; padding: 20px; }
+        .content { margin-left: 220px; padding: 20px; }
+        li { cursor: pointer; margin-bottom: 10px; }
+        li:hover { background-color: #ddd; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div id="admin">
+  <div class="sidebar">
+    <ul>
+      <li v-for="model in models" @click="selectModel(model)">{{ model }}</li>
+    </ul>
+  </div>
+  <div class="content">
+    <!-- Placeholder for your dynamic model table component -->
+  </div>
+</div>
+
+<script>
+const app = Vue.createApp({
+  data() {
+    return {
+      models: [],
+      selectedModel: null,
+    };
+  },
+  methods: {
+    async fetchModels() {
+      const response = await axios.get('/openapi.json');
+      this.models = Object.keys(response.data.components.schemas);
+    },
+    selectModel(model) {
+      this.selectedModel = model;
+      // Fetch model data and pass it to your dynamic table component
+    },
+  },
+  mounted() {
+    this.fetchModels();
+  },
+});
+
+app.mount('#admin');
+</script>
+
+<script>
+const { createApp, reactive, toRefs, onMounted } = Vue;
+
+const ModelTable = {
+    props: ['model'],
+    setup(props) {
+        const state = reactive({
+            records: [],
+            schema: null,
+        });
+
+        onMounted(async () => {
+            // Fetch model schema
+            const schemaResponse = await axios.get(`/openapi.json`);
+            state.schema = schemaResponse.data.components.schemas[props.model];
+
+            // Fetch records for the selected model
+            const recordsResponse = await axios.get(`/${props.model.toLowerCase()}s/`);
+            state.records = recordsResponse.data;
+        });
+
+        return { ...toRefs(state) };
+    },
+    template: `
+        <div>
+            <h2>{{ model }} Records</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th v-for="(value, key) in schema.properties" :key="key">
+                            {{ key }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="record in records" :key="record.id">
+                        <td v-for="(value, key) in schema.properties" :key="key">
+                            {{ record[key] }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    `,
+};
+
+createApp({
+    components: { ModelTable },
+    setup() {
+        const state = reactive({
+            models: [],
+            selectedModel: null,
+        });
+
+        onMounted(async () => {
+            const response = await axios.get('/openapi.json');
+            state.models = Object.keys(response.data.components.schemas);
+        });
+
+        const selectModel = (model) => {
+            state.selectedModel = model;
+        };
+
+        return { ...toRefs(state), selectModel };
+    },
+}).mount('#admin');
+</script>
+</body>
+</html>
